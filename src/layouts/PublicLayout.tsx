@@ -19,7 +19,6 @@ const navLinks = [
   { label: 'Yapay Zeka', href: '/#yapay-zeka' },
   { label: 'Nasıl Çalışır', href: '/#platform' },
   { label: 'Programlar', href: '/#programlar' },
-  { label: 'SSS', href: '/#sss' },
 ];
 
 export function KubikLogo({ light = false }: { light?: boolean }) {

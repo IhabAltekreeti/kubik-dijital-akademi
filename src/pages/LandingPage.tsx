@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import {
   ArrowRight,
@@ -11,7 +10,6 @@ import {
   Building2,
   CalendarCheck,
   CheckCircle2,
-  ChevronDown,
   ClipboardList,
   GraduationCap,
   Lightbulb,
@@ -564,66 +562,6 @@ function WhySection() {
 }
 
 /* ------------------------------------------------------------------ */
-/* FAQ                                                                 */
-/* ------------------------------------------------------------------ */
-
-const faq = [
-  {
-    q: 'Kübik Dijital Akademi nedir?',
-    a: "Kübik Dershanesi'nin öğrencilerine, velilerine ve öğretmenlerine özel dijital eğitim platformudur. Derste öğrenilenleri evde soru çözümü, hata takibi ve yapay zeka desteğiyle pekiştirmeyi sağlar.",
-  },
-  {
-    q: 'Kimler kullanabilir?',
-    a: 'Platform Kübik öğrencilerine ve velilerine özeldir. Giriş bilgileri kayıt sırasında dershanemiz tarafından verilir.',
-  },
-  {
-    q: 'Veliler neleri görebilir?',
-    a: 'Veliler; çocuklarının haftalık çalışma süresini, ödev durumunu, deneme netlerini, güçlü ve zayıf konularını ve öğretmen notlarını görebilir.',
-  },
-  {
-    q: 'Yapay zeka cevapları direkt mi veriyor?',
-    a: 'Hayır. Kübik AI önce ipucu verir ve öğrenciyi düşünmeye yönlendirir. Öğrenci isterse çözümü adım adım açıklar. Amaç ezber değil, kalıcı öğrenmedir.',
-  },
-  {
-    q: 'Hangi sınıflar ve sınavlar destekleniyor?',
-    a: '5, 6 ve 7. sınıf ortaokul desteği, 8. sınıf LGS hazırlığı, 9–11. sınıf lise desteği ile 12. sınıf ve mezunlar için YKS (TYT–AYT) hazırlığı.',
-  },
-  {
-    q: 'Öğrenci verileri güvende mi?',
-    a: 'Öğrenci verileri yalnızca öğrencinin kendisi, velisi, öğretmenleri ve dershane yönetimi tarafından görüntülenebilir; KVKK kapsamında korunur.',
-  },
-];
-
-function FAQSection() {
-  const [open, setOpen] = useState<number | null>(0);
-  return (
-    <section id="sss" className="py-20 lg:py-28 bg-white scroll-mt-16">
-      <div className="container-page max-w-3xl">
-        <SectionHeading eyebrow="Sıkça sorulan sorular" title="Merak edilenler" />
-        <div className="divide-y divide-navy-100 rounded-2xl border border-navy-100 bg-white shadow-card">
-          {faq.map((item, i) => (
-            <div key={item.q}>
-              <button
-                onClick={() => setOpen(open === i ? null : i)}
-                className="w-full flex items-center justify-between gap-4 px-6 py-5 text-left"
-              >
-                <span className="text-sm sm:text-base font-semibold text-navy-900">{item.q}</span>
-                <ChevronDown
-                  className={`h-5 w-5 text-navy-400 shrink-0 transition-transform duration-200 ${open === i ? 'rotate-180' : ''}`}
-                />
-              </button>
-              {open === i && (
-                <div className="px-6 pb-5 -mt-1 text-sm text-navy-500 leading-relaxed animate-slide-down">{item.a}</div>
-              )}
-            </div>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
-
-/* ------------------------------------------------------------------ */
 /* CTA                                                                 */
 /* ------------------------------------------------------------------ */
 
@@ -671,7 +609,6 @@ export default function LandingPage() {
       <LoopSection />
       <ProgramsSection />
       <WhySection />
-      <FAQSection />
       <CTASection />
     </PublicLayout>
   );
