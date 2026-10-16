@@ -146,9 +146,9 @@ export function login(email: string, password: string, expectedRole?: UserRole):
   return { success: true, user: profile };
 }
 
-const demoAccounts: { role: UserRole; email: string; displayName: string; educationLevel: StudentProfile['educationLevel']; program: StudentProfile['program'] }[] = [
+const demoAccounts: { role: UserRole; id?: string; email: string; displayName: string; educationLevel: StudentProfile['educationLevel']; program: StudentProfile['program'] }[] = [
   { role: 'student', email: 'ayse@kubik.com', displayName: 'Ayşe Yılmaz', educationLevel: 'lgs', program: 'lgs' },
-  { role: 'parent', email: 'demo-veli@kubik.com', displayName: 'Demo Veli', educationLevel: 'ortaokul', program: 'lgs' },
+  { role: 'parent', id: 'demo-parent-1', email: 'veli.ayse@kubik.com', displayName: 'Fatma Yılmaz', educationLevel: 'ortaokul', program: 'lgs' },
   { role: 'teacher', email: 'demo-ogretmen@kubik.com', displayName: 'Demo Öğretmen', educationLevel: 'lise', program: 'yks' },
   { role: 'admin', email: 'demo-admin@kubik.com', displayName: 'Demo Yönetici', educationLevel: 'lise', program: 'yks' },
 ];
@@ -160,7 +160,7 @@ export function loginAsDemo(role: UserRole = 'student'): AuthResult {
 
   if (!demoUser) {
     demoUser = {
-      id: generateId('demo-'),
+      id: demo.id ?? generateId('demo-'),
       displayName: demo.displayName,
       email: demo.email,
       educationLevel: demo.educationLevel,
