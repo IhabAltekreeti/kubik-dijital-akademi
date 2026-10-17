@@ -151,7 +151,7 @@ export function localParentReply(m: TeacherMessage): string {
     return `${hi}\n\nGeçmiş olsun. ${first}'in kaçırdığı konuları telafi etmesi için ${nextSlotText(s.classId, 'Etüt')} etüt saatine bekliyorum; ders notlarını ve konu özet videosunu da panelinden paylaşacağım. Şu an devam oranı %${s.attendanceRate}, bu hafta toparlarsak sorun olmayacaktır.${sign}`;
   }
   if (t.includes('çalışmıyor') || t.includes('düş') || t.includes('endişe') || t.includes('kötü')) {
-    return `${hi}\n\nEndişenizi anlıyorum, paylaştığınız için teşekkür ederim. Verilere baktığımda ${first} ${trend}; son platform çalışması ${s.lastActiveDaysAgo === 0 ? 'bugün' : `${s.lastActiveDaysAgo} gün önce`} ödev teslimi ise ${s.homeworkDone}/${s.homeworkTotal}. Özellikle ${weak} konusunda desteğe ihtiyacı var. Bu hafta kendisiyle birebir görüşüp küçük, günlük hedefler belirleyeceğim; evde de günde 20-30 dakikalık düzenli çalışma saatine destek olursanız kısa sürede toparlanacağına inanıyorum.${sign}`;
+    return `${hi}\n\nEndişenizi anlıyorum, paylaştığınız için teşekkür ederim. Verilere baktığımda ${first} ${trend}; son platform çalışması ${s.lastActiveDaysAgo === 0 ? 'bugün' : `${s.lastActiveDaysAgo} gün önce`}, ödev teslimi ise ${s.homeworkDone}/${s.homeworkTotal}. Özellikle ${weak} konusunda desteğe ihtiyacı var. Bu hafta kendisiyle birebir görüşüp küçük, günlük hedefler belirleyeceğim; evde de günde 20-30 dakikalık düzenli çalışma saatine destek olursanız kısa sürede toparlanacağına inanıyorum.${sign}`;
   }
   return `${hi}\n\nMesajınız için teşekkür ederim. ${first} ${trend}. Önümüzdeki dönemde ${weak} konusuna ağırlık vereceğiz. Aklınıza takılan her konuda buradan yazabilirsiniz.${sign}`;
 }
