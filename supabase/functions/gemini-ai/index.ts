@@ -7,7 +7,9 @@ const corsHeaders = {
 };
 
 interface AIRequest {
-  mode: "hint" | "explain" | "topic" | "similar_question" | "chat";
+  mode: "hint" | "explain" | "topic" | "similar_question" | "chat" | "teacher_class_analysis" | "parent_reply_draft";
+  /** Öğretmen modları için hazırlanmış veri özeti */
+  contextText?: string;
   grade?: number;
   subject?: string;
   topic?: string;
@@ -36,6 +38,14 @@ KURALLAR:
 - Sınıf seviyesini aşma
 - Eğitici, destekleyici ve nazik ol
 - Matematiksel ifadeleri basit yaz, LaTeX kullanma`;
+
+const TEACHER_SYSTEM_PROMPT = `Sen Kübik Dijital Akademi'nin öğretmen asistanısın. Bir dershane öğretmenine (LGS/YKS) şube verilerini yorumlamada ve velilerle iletişimde yardım ediyorsun.
+
+KURALLAR:
+- Türkçe, kısa ve uygulanabilir yaz
+- Sadece verilen verileri kullan, sayı uydurma
+- Öğrenciler hakkında yargılayıcı olma, çözüm odaklı ol
+- Markdown başlıkları kullanma; düz paragraflar ve "- " ile başlayan maddeler kullan`;
 
 function buildPrompt(req: AIRequest): string {
   const gradeText = req.grade ? `${req.grade}. sınıf seviyesinde` : "ortaokul/lise seviyesinde";
@@ -106,6 +116,31 @@ Yanıtını SADECE aşağıdaki JSON formatında ver:
 
 JSON dışında hiçbir metin ekleme.`;
     }
+    case "teacher_class_analysis": {
+      return `${TEACHER_SYSTEM_PROMPT}
+
+Aşağıdaki şube verilerine göre öğretmene haftalık bir şube analizi yaz.
+1) 2-3 cümlelik genel değerlendirme
+2) Sınıfın en çok zorlandığı konular ve neden önemli oldukları
+3) Bireysel ilgi gereken öğrenciler (isimle)
+4) Önümüzdeki hafta için 3-4 maddelik ders/etüt planı
+
+ŞUBE VERİLERİ:
+${req.contextText ?? ""}`;
+    }
+    case "parent_reply_draft": {
+      return `${TEACHER_SYSTEM_PROMPT}
+
+Bir veli öğretmene mesaj yazdı. Öğretmen adına nazik, samimi ama profesyonel, 4-6 cümlelik bir cevap taslağı yaz.
+Veliye "Hanım"/"Bey" diye hitap et, öğrencinin verilerinden somut 1-2 bilgi ver, net bir öneri veya randevu teklifi ekle.
+Sadece cevap metnini yaz, imza olarak "Ali Hoca" kullan.
+
+ÖĞRENCİ VERİLERİ:
+${req.contextText ?? ""}
+
+VELİ MESAJI:
+${req.userMessage ?? ""}`;
+    }
     case "chat":
     default: {
       const historyText = req.chatHistory && req.chatHistory.length > 0
@@ -157,7 +192,9 @@ Deno.serve(async (req) => {
     const supabaseAnonKey = Deno.env.get("SUPABASE_ANON_KEY");
     const authHeader = req.headers.get("Authorization");
 
-    if (supabaseUrl && supabaseAnonKey && authHeader) {
+    // Ön yüz anon key ile istek atar; bu durumda kullanıcı doğrulaması atlanır (Supabase Auth henüz kullanılmıyor).
+    const isAnonKey = authHeader === `Bearer ${supabaseAnonKey}`;
+    if (supabaseUrl && supabaseAnonKey && authHeader && !isAnonKey) {
       const supabase = createClient(supabaseUrl, supabaseAnonKey, {
         global: { headers: { Authorization: authHeader } },
       });
@@ -171,9 +208,10 @@ Deno.serve(async (req) => {
     }
 
     const prompt = buildPrompt(body);
+    const model = Deno.env.get("GEMINI_MODEL") ?? "gemini-2.5-flash";
 
     const geminiResponse = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`,
+      `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`,
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -181,7 +219,9 @@ Deno.serve(async (req) => {
           contents: [{ parts: [{ text: prompt }] }],
           generationConfig: {
             temperature: 0.7,
-            maxOutputTokens: 1024,
+            maxOutputTokens: 2048,
+            // 2.5 Flash'ta "düşünme" token'ları çıktı bütçesini yemesin
+            ...(model.includes("2.5-flash") ? { thinkingConfig: { thinkingBudget: 0 } } : {}),
           },
         }),
       }
