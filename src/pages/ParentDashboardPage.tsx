@@ -236,12 +236,29 @@ function Announcements({ o }: { o: ChildOverview }) {
           const Icon = iconFor[n.kind];
           const d = dateFromDays(n.inDays);
           return (
-            <div key={n.id} className="flex gap-3 rounded-xl border border-navy-100 p-3.5 hover:bg-navy-50 transition-colors">
+            <div
+              key={n.id}
+              className={`flex gap-3 rounded-xl border p-3.5 transition-colors ${
+                n.source === 'admin' ? 'border-brand-200 bg-brand-50/60 hover:bg-brand-50' : 'border-navy-100 hover:bg-navy-50'
+              }`}
+            >
               <div className="flex h-11 w-11 shrink-0 flex-col items-center justify-center rounded-xl bg-navy-900 text-white leading-none">
                 <span className="text-sm font-bold">{d.getDate()}</span>
                 <span className="text-[9px] uppercase mt-0.5">{fmtDate(d, { month: 'short' })}</span>
               </div>
               <div className="min-w-0">
+                {n.source === 'admin' && (
+                  <div className="mb-1 flex items-center gap-1.5">
+                    <span className="inline-flex items-center rounded-full bg-navy-900 px-2 py-0.5 text-[10px] font-semibold text-white">
+                      Yönetim
+                    </span>
+                    {n.isNew && (
+                      <span className="inline-flex items-center rounded-full bg-brand-600 px-2 py-0.5 text-[10px] font-semibold text-white">
+                        Yeni
+                      </span>
+                    )}
+                  </div>
+                )}
                 <p className="text-sm font-semibold text-navy-900 flex items-center gap-1.5">
                   <Icon className="h-3.5 w-3.5 text-brand-600" />
                   {n.title}

@@ -23,9 +23,9 @@ interface AIRequest {
   chatHistory?: Array<{ role: "user" | "assistant"; content: string }>;
 }
 
-const SYSTEM_PROMPT = `Sen Kubik Dijital Akademi'nin yapay zeka öğrenme asistanısın. Türk eğitim sistemine (LGS, YKS, okul dersleri) hakimsin.
+const SYSTEM_PROMPT = `Sen Kübik Dijital Akademi'nin yapay zeka öğrenme asistanısın. Türk eğitim sistemine (LGS, YKS, okul dersleri) hakimsin.
 
-GÖREVELİRİN:
+GÖREVLERİN:
 - Öğrencilere eğitim konusunda yardımcı olmak
 - Soruları açıklamak, ipuçları vermek, konu anlatmak
 - Öğrencinin sınıf seviyesine uygun içerik üretmek

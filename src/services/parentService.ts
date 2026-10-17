@@ -62,7 +62,8 @@ export interface ChildOverview {
   upcomingExams: ExamEntry[];
   attendanceRate: number;
   attendanceCounts: { present: number; late: number; absent: number; excused: number };
-  announcements: Announcement[];
+  /** source: 'admin' → yönetim panelinden; isNew → son 7 gün ("Yeni" rozeti) */
+  announcements: (Announcement & { source?: 'admin'; isNew?: boolean })[];
 }
 
 type StoredUser = StudentProfile & { passwordHash?: string };
@@ -152,13 +153,15 @@ export function getChildOverview(student: StudentProfile): ChildOverview | null 
       // Yönetim panelinden gelen duyurular en üstte
       ...getAdminAnnouncements()
         .filter((a) => a.audience === 'all' || a.audience === adminAudience)
-        .map((a): Announcement => ({
+        .map((a): Announcement & { source: 'admin'; isNew: boolean } => ({
           id: a.id,
           title: a.title,
           body: a.body,
           inDays: a.eventDate ? Math.round((new Date(`${a.eventDate}T12:00:00`).getTime() - new Date().setHours(12, 0, 0, 0)) / 86400000) : 0,
           kind: a.kind,
           audience: 'all',
+          source: 'admin',
+          isNew: Date.now() - new Date(a.createdAt).getTime() < 7 * 86400000,
         })),
       ...announcements.filter((n) => n.audience === 'all' || n.audience === audience).sort((a, b) => a.inDays - b.inDays),
     ],
