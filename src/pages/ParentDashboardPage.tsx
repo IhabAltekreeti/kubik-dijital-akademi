@@ -680,13 +680,21 @@ function ContactTeacher({ o, parentId }: { o: ChildOverview; parentId: string })
         )}
       </form>
       {messages.length > 0 && (
-        <div className="mt-4 pt-4 border-t border-navy-100 space-y-2 max-h-40 overflow-y-auto">
+        <div className="mt-4 pt-4 border-t border-navy-100 space-y-2 max-h-72 overflow-y-auto">
           {messages.map((m) => (
             <div key={m.id} className="rounded-lg bg-navy-50 px-3 py-2">
               <p className="text-[11px] text-navy-400">
                 {m.kind === 'meeting' ? 'Görüşme talebi' : 'Mesaj'} → {m.teacherName} · {fmtDate(m.createdAt, { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}
               </p>
               <p className="text-xs text-navy-700 mt-0.5">{m.text}</p>
+              {m.reply && (
+                <div className="mt-2 rounded-lg border-l-2 border-brand-500 bg-white px-2.5 py-1.5">
+                  <p className="text-[11px] font-semibold text-brand-700">
+                    {m.reply.teacherName} cevapladı · {fmtDate(m.reply.createdAt, { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}
+                  </p>
+                  <p className="text-xs text-navy-700 mt-0.5 whitespace-pre-line">{m.reply.text}</p>
+                </div>
+              )}
             </div>
           ))}
         </div>
