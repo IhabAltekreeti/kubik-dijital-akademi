@@ -4,6 +4,7 @@ import { getProgress, getUnresolvedMistakes, getTopicsNeedingReview } from './le
 import { getAssignments, getUpcomingExams } from './studyPlanService';
 import { childExtras, announcements, demoParents, type ChildExtra, type DemoExamResult, type Announcement } from '@/data/parentDemo';
 import { subjectLabels } from '@/data/programs';
+import { getStoredNotesForStudent } from './teacherNotesStore';
 
 const MESSAGES_KEY = 'kubik_parent_messages';
 
@@ -41,6 +42,8 @@ export interface ParentMessage {
   text: string;
   createdAt: string;
   status: 'sent' | 'read' | 'replied';
+  parentName?: string;
+  reply?: { text: string; createdAt: string; teacherName: string };
 }
 
 export interface ChildOverview {
@@ -76,8 +79,10 @@ export function getChildrenForParent(parentId: string): StudentProfile[] {
 const dayLabels = ['Paz', 'Pzt', 'Sal', 'Çar', 'Per', 'Cum', 'Cmt'];
 
 export function getChildOverview(student: StudentProfile): ChildOverview | null {
-  const extra = childExtras[student.id];
-  if (!extra) return null;
+  const baseExtra = childExtras[student.id];
+  if (!baseExtra) return null;
+  // Öğretmen panelinden eklenen notlar veli paneline de yansır
+  const extra: ChildExtra = { ...baseExtra, notes: [...getStoredNotesForStudent(student.id), ...baseExtra.notes] };
 
   const progress = getProgress(student.id);
 

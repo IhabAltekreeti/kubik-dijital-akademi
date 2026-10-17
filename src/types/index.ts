@@ -156,6 +156,10 @@ export interface Assignment {
   submittedAt: string | null;
   score: number | null;
   maxScore: number | null;
+  /** Soru bankasından seçilen sorular (öğretmen ödevi) */
+  questionIds?: string[];
+  /** Öğretmen panelindeki şube ödevine bağlantı */
+  classAssignmentId?: string;
 }
 
 export interface ExamEntry {
