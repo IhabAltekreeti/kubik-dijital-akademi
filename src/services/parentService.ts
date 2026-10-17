@@ -5,6 +5,7 @@ import { getAssignments, getUpcomingExams } from './studyPlanService';
 import { childExtras, announcements, demoParents, type ChildExtra, type DemoExamResult, type Announcement } from '@/data/parentDemo';
 import { subjectLabels } from '@/data/programs';
 import { getStoredNotesForStudent } from './teacherNotesStore';
+import { getAdminAnnouncements } from './announcementStore';
 
 const MESSAGES_KEY = 'kubik_parent_messages';
 
@@ -129,6 +130,8 @@ export function getChildOverview(student: StudentProfile): ChildOverview | null 
   const attendanceRate = Math.round(((counts.present + counts.late) / extra.attendance.length) * 100);
 
   const audience = student.program === 'yks' || (student.grade ?? 0) >= 9 ? 'yks' : 'lgs';
+  const grade = student.grade ?? 0;
+  const adminAudience = audience === 'yks' ? 'yks' : grade > 0 && grade < 8 ? 'ara' : 'lgs';
 
   return {
     student,
@@ -145,9 +148,20 @@ export function getChildOverview(student: StudentProfile): ChildOverview | null 
     upcomingExams: getUpcomingExams(student.id),
     attendanceRate,
     attendanceCounts: counts,
-    announcements: announcements
-      .filter((n) => n.audience === 'all' || n.audience === audience)
-      .sort((a, b) => a.inDays - b.inDays),
+    announcements: [
+      // Yönetim panelinden gelen duyurular en üstte
+      ...getAdminAnnouncements()
+        .filter((a) => a.audience === 'all' || a.audience === adminAudience)
+        .map((a): Announcement => ({
+          id: a.id,
+          title: a.title,
+          body: a.body,
+          inDays: a.eventDate ? Math.round((new Date(`${a.eventDate}T12:00:00`).getTime() - new Date().setHours(12, 0, 0, 0)) / 86400000) : 0,
+          kind: a.kind,
+          audience: 'all',
+        })),
+      ...announcements.filter((n) => n.audience === 'all' || n.audience === audience).sort((a, b) => a.inDays - b.inDays),
+    ],
   };
 }
 
