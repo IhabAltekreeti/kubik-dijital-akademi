@@ -14,11 +14,15 @@ import {
   ClipboardList,
   MessageSquare,
   Sparkles,
-  Repeat,
+  BarChart3,
+  UserPlus,
+  Wallet,
+  Megaphone,
   type LucideIcon,
 } from 'lucide-react';
 import type { UserRole } from '@/types';
-import { getCurrentUser, logout, loginAsDemo } from '@/services/authService';
+import { getCurrentUser, logout } from '@/services/authService';
+import DemoSwitcher from '@/components/DemoSwitcher';
 
 interface RoleLayoutProps {
   children: ReactNode;
@@ -53,7 +57,12 @@ const navByRole: Record<UserRole, NavItem[]> = {
     { label: 'Profil', href: '/teacher/profile', icon: User },
   ],
   admin: [
-    { label: 'Panel', href: '/admin', icon: LayoutDashboard },
+    { label: 'Genel Bakış', href: '/admin', icon: LayoutDashboard },
+    { label: 'Akademik', href: '/admin/academics', icon: BarChart3 },
+    { label: 'Öğretmenler', href: '/admin/teachers', icon: Presentation },
+    { label: 'Ön Kayıt', href: '/admin/enrollment', icon: UserPlus },
+    { label: 'Finans', href: '/admin/finance', icon: Wallet },
+    { label: 'Duyurular', href: '/admin/announcements', icon: Megaphone },
     { label: 'Profil', href: '/admin/profile', icon: User },
   ],
 };
@@ -62,7 +71,7 @@ const roleBadgeConfig: Record<UserRole, { label: string; icon: LucideIcon; color
   student: { label: 'Öğrenci', icon: GraduationCap, color: 'bg-brand-100 text-brand-700' },
   parent: { label: 'Veli', icon: Users, color: 'bg-success-100 text-success-700' },
   teacher: { label: 'Öğretmen', icon: Presentation, color: 'bg-warning-100 text-warning-700' },
-  admin: { label: 'Yönetici', icon: Shield, color: 'bg-error-100 text-error-700' },
+  admin: { label: 'Yönetim', icon: Shield, color: 'bg-error-100 text-error-700' },
 };
 
 function SidebarNavLink({ item, onClick, badge }: { item: NavItem; onClick?: () => void; badge?: number }) {
@@ -118,23 +127,14 @@ export default function RoleLayout({ children, pageTitle, pageDescription, role,
 
   const navItems = navByRole[role];
 
-  // Sunum kolaylığı: demo velisi tek tıkla Ali Hoca'nın ekranına geçebilir
-  function switchToTeacherDemo() {
-    const r = loginAsDemo('teacher');
-    if (r.success) navigate('/teacher');
-  }
+  // Sunum kolaylığı: demo hesaplarda Öğrenci · Veli · Öğretmen · Yönetim arasında tek tık geçiş
   const headerActions =
-    actions ??
-    (role === 'parent' && user.isDemo ? (
-      <button
-        onClick={switchToTeacherDemo}
-        className="inline-flex items-center gap-1.5 h-9 px-3 rounded-lg border border-dashed border-navy-300 text-xs font-medium text-navy-600 hover:bg-navy-50"
-        title="Sadece demo içindir"
-      >
-        <Repeat className="h-3.5 w-3.5" />
-        Öğretmen ekranı (demo)
-      </button>
-    ) : null);
+    actions || user.isDemo ? (
+      <>
+        {actions}
+        {user.isDemo && <DemoSwitcher current={role} />}
+      </>
+    ) : null;
   const badge = roleBadgeConfig[role];
   const BadgeIcon = badge.icon;
 
@@ -146,7 +146,7 @@ export default function RoleLayout({ children, pageTitle, pageDescription, role,
           <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-navy-900">
             <GraduationCap className="h-5 w-5 text-white" />
           </div>
-          <span className="text-lg font-bold text-navy-900">Kubik</span>
+          <span className="text-lg font-bold text-navy-900">Kübik</span>
         </Link>
 
         <nav className="flex-1 space-y-1 px-3 py-4 overflow-y-auto" aria-label="Ana navigasyon">
@@ -189,7 +189,7 @@ export default function RoleLayout({ children, pageTitle, pageDescription, role,
                 <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-navy-900">
                   <GraduationCap className="h-5 w-5 text-white" />
                 </div>
-                <span className="text-lg font-bold text-navy-900">Kubik</span>
+                <span className="text-lg font-bold text-navy-900">Kübik</span>
               </Link>
               <button
                 onClick={() => setSidebarOpen(false)}
@@ -243,7 +243,7 @@ export default function RoleLayout({ children, pageTitle, pageDescription, role,
               <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-navy-900">
                 <GraduationCap className="h-5 w-5 text-white" />
               </div>
-              <span className="font-bold text-navy-900">Kubik</span>
+              <span className="font-bold text-navy-900">Kübik</span>
             </Link>
             <div className={`flex h-9 w-9 items-center justify-center rounded-full ${badge.color}`}>
               <BadgeIcon className="h-4 w-4" />

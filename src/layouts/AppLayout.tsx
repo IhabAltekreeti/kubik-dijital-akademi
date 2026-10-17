@@ -17,6 +17,7 @@ import {
 } from 'lucide-react';
 import type { StudentProfile, UserRole } from '@/types';
 import { getCurrentUser, logout, getDashboardPath } from '@/services/authService';
+import DemoSwitcher from '@/components/DemoSwitcher';
 
 interface AppLayoutProps {
   children: ReactNode;
@@ -78,6 +79,13 @@ export default function AppLayout({ children, pageTitle, pageDescription, action
   }
 
   const profile = user as StudentProfile;
+  const headerActions =
+    actions || user.isDemo ? (
+      <>
+        {actions}
+        {user.isDemo && <DemoSwitcher current="student" />}
+      </>
+    ) : null;
 
   return (
     <div className="min-h-screen bg-navy-50 flex">
@@ -87,7 +95,7 @@ export default function AppLayout({ children, pageTitle, pageDescription, action
           <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-navy-900">
             <GraduationCap className="h-5 w-5 text-white" />
           </div>
-          <span className="text-lg font-bold text-navy-900">Kubik</span>
+          <span className="text-lg font-bold text-navy-900">Kübik</span>
         </Link>
 
         <nav className="flex-1 space-y-1 px-3 py-4 overflow-y-auto" aria-label="Ana navigasyon">
@@ -130,7 +138,7 @@ export default function AppLayout({ children, pageTitle, pageDescription, action
                 <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-navy-900">
                   <GraduationCap className="h-5 w-5 text-white" />
                 </div>
-                <span className="text-lg font-bold text-navy-900">Kubik</span>
+                <span className="text-lg font-bold text-navy-900">Kübik</span>
               </Link>
               <button
                 onClick={() => setSidebarOpen(false)}
@@ -184,7 +192,7 @@ export default function AppLayout({ children, pageTitle, pageDescription, action
               <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-navy-900">
                 <GraduationCap className="h-5 w-5 text-white" />
               </div>
-              <span className="font-bold text-navy-900">Kubik</span>
+              <span className="font-bold text-navy-900">Kübik</span>
             </Link>
             <Link to="/app/profile" aria-label="Profil" className="flex h-9 w-9 items-center justify-center rounded-full bg-brand-100 text-brand-700 font-semibold text-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500">
               {profile.displayName.charAt(0).toUpperCase()}
@@ -200,7 +208,7 @@ export default function AppLayout({ children, pageTitle, pageDescription, action
                 <h1 className="text-lg font-semibold text-navy-900">{pageTitle}</h1>
                 {pageDescription && <p className="text-sm text-navy-400">{pageDescription}</p>}
               </div>
-              {actions && <div className="flex items-center gap-3">{actions}</div>}
+              {headerActions && <div className="flex items-center gap-3">{headerActions}</div>}
             </div>
           </div>
         </header>
@@ -210,7 +218,7 @@ export default function AppLayout({ children, pageTitle, pageDescription, action
           <div className="lg:hidden mb-5">
             <h1 className="text-xl font-bold text-navy-900">{pageTitle}</h1>
             {pageDescription && <p className="text-sm text-navy-400 mt-0.5">{pageDescription}</p>}
-            {actions && <div className="mt-3 flex items-center gap-3">{actions}</div>}
+            {headerActions && <div className="mt-3 flex flex-wrap items-center gap-3">{headerActions}</div>}
           </div>
           {children}
         </main>

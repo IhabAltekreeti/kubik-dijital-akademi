@@ -7,7 +7,7 @@ const corsHeaders = {
 };
 
 interface AIRequest {
-  mode: "hint" | "explain" | "topic" | "similar_question" | "chat" | "teacher_class_analysis" | "parent_reply_draft";
+  mode: "hint" | "explain" | "topic" | "similar_question" | "chat" | "teacher_class_analysis" | "parent_reply_draft" | "admin_weekly_report";
   /** Öğretmen modları için hazırlanmış veri özeti */
   contextText?: string;
   grade?: number;
@@ -25,7 +25,7 @@ interface AIRequest {
 
 const SYSTEM_PROMPT = `Sen Kubik Dijital Akademi'nin yapay zeka öğrenme asistanısın. Türk eğitim sistemine (LGS, YKS, okul dersleri) hakimsin.
 
-GÖREVELERİN:
+GÖREVELİRİN:
 - Öğrencilere eğitim konusunda yardımcı olmak
 - Soruları açıklamak, ipuçları vermek, konu anlatmak
 - Öğrencinin sınıf seviyesine uygun içerik üretmek
@@ -46,6 +46,14 @@ KURALLAR:
 - Sadece verilen verileri kullan, sayı uydurma
 - Öğrenciler hakkında yargılayıcı olma, çözüm odaklı ol
 - Markdown başlıkları kullanma; düz paragraflar ve "- " ile başlayan maddeler kullan`;
+
+const ADMIN_SYSTEM_PROMPT = `Sen Kübik Dijital Akademi'nin yönetim asistanısın. Dershanenin kurucusu ve genel müdürü Ali Hoca'ya haftalık yönetim raporu hazırlıyorsun.
+
+KURALLAR:
+- Türkçe, kısa, net ve yönetici diliyle yaz
+- Sadece verilen verileri kullan, sayı uydurma; tutarları ₺ ile ve verildiği gibi yaz
+- Öğretmenler hakkında yapıcı ol; isim verirken suçlayıcı olma
+- Markdown başlıkları kullanma; "Başlık:" satırları, düz paragraflar ve "- " ile başlayan maddeler kullan`;
 
 function buildPrompt(req: AIRequest): string {
   const gradeText = req.grade ? `${req.grade}. sınıf seviyesinde` : "ortaokul/lise seviyesinde";
@@ -140,6 +148,19 @@ ${req.contextText ?? ""}
 
 VELİ MESAJI:
 ${req.userMessage ?? ""}`;
+    }
+    case "admin_weekly_report": {
+      return `${ADMIN_SYSTEM_PROMPT}
+
+Aşağıdaki kurum verilerine göre haftalık yönetim raporu yaz. Şu bölümleri sırayla kullan:
+Genel tablo: (2-3 cümle: öğrenci sayısı, hedef, doluluk, bugünkü devam)
+Akademik: (2-3 madde: seviye ortalamaları, Türkiye karşılaştırması, yükselen/düşen şube)
+Finans: (2 madde: bu ayın tahsilatı, gecikenler)
+Öğretmenler: (2 madde: öne çıkanlar ve destek gerekenler)
+Bu hafta yapılacaklar: (3-5 somut madde, isimlerle)
+
+KURUM VERİLERİ:
+${req.contextText ?? ""}`;
     }
     case "chat":
     default: {

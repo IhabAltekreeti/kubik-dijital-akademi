@@ -19,14 +19,14 @@ const roleOptions: { value: UserRole; label: string; icon: typeof UserIcon }[] =
   { value: 'student', label: 'Öğrenci', icon: GraduationCap },
   { value: 'parent', label: 'Veli', icon: Users },
   { value: 'teacher', label: 'Öğretmen', icon: Presentation },
-  { value: 'admin', label: 'Yönetici', icon: Shield },
+  { value: 'admin', label: 'Yönetim', icon: Shield },
 ];
 
 const demoLabels: Record<UserRole, string> = {
   student: 'Demo Öğrenci',
   parent: 'Demo Veli',
   teacher: 'Demo Öğretmen',
-  admin: 'Demo Yönetici (Yerel)',
+  admin: 'Demo Yönetim',
 };
 
 export default function LoginPage() {
@@ -72,7 +72,7 @@ export default function LoginPage() {
             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-navy-900">
               <GraduationCap className="h-6 w-6 text-white" />
             </div>
-            <span className="text-xl font-bold text-navy-900">Kubik</span>
+            <span className="text-xl font-bold text-navy-900">Kübik</span>
           </Link>
 
           <Card padding="lg">
@@ -164,15 +164,6 @@ export default function LoginPage() {
                 );
               })}
             </div>
-
-            {selectedRole === 'admin' && (
-              <div className="mt-4 flex items-start gap-2 rounded-xl bg-warning-50 border border-warning-100 px-4 py-3">
-                <Shield className="h-4 w-4 text-warning-600 shrink-0 mt-0.5" />
-                <p className="text-xs text-warning-700">
-                  Yönetici demo erişimi yalnızca yerel prototip içindir. Üretim ortamında güvenli erişim geçerli değildir.
-                </p>
-              </div>
-            )}
 
             <p className="mt-6 text-center text-sm text-navy-500">
               Hesabın yok mu?{' '}
