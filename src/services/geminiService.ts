@@ -1,6 +1,9 @@
 import type { Question, Subject, AIContext, ChatMessage, GeneratedQuestion } from '@/types';
 
-const EDGE_FUNCTION_URL = '/functions/v1/gemini-ai';
+const SUPABASE_URL = (import.meta.env?.VITE_SUPABASE_URL as string | undefined)?.replace(/\/$/, '');
+const SUPABASE_ANON_KEY = import.meta.env?.VITE_SUPABASE_ANON_KEY as string | undefined;
+// Supabase adresi tanımlıysa doğrudan Edge Function'a gider; değilse (yerel proxy) göreli adres kullanılır.
+const EDGE_FUNCTION_URL = SUPABASE_URL ? `${SUPABASE_URL}/functions/v1/gemini-ai` : '/functions/v1/gemini-ai';
 
 export interface GeminiExplanationRequest {
   questionText: string;
@@ -38,12 +41,20 @@ export function shouldOfferGeminiExplanation(_question: Question): boolean {
   return true;
 }
 
-async function callEdgeFunction(body: Record<string, unknown>): Promise<{ ok: boolean; data?: Record<string, unknown>; error?: string; code?: string }> {
+export async function callEdgeFunction(body: Record<string, unknown>, timeoutMs = 20000): Promise<{ ok: boolean; data?: Record<string, unknown>; error?: string; code?: string }> {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
   try {
+    const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+    if (SUPABASE_ANON_KEY) {
+      headers.Authorization = `Bearer ${SUPABASE_ANON_KEY}`;
+      headers.apikey = SUPABASE_ANON_KEY;
+    }
     const response = await fetch(EDGE_FUNCTION_URL, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers,
       body: JSON.stringify(body),
+      signal: controller.signal,
     });
 
     const data = await response.json();
@@ -55,6 +66,8 @@ async function callEdgeFunction(body: Record<string, unknown>): Promise<{ ok: bo
     return { ok: true, data };
   } catch {
     return { ok: false, error: 'AI servisine bağlanılamadı. İnternet bağlantınızı kontrol edin.', code: 'NETWORK_ERROR' };
+  } finally {
+    clearTimeout(timer);
   }
 }
 

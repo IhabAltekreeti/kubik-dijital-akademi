@@ -149,7 +149,7 @@ export function login(email: string, password: string, expectedRole?: UserRole):
 const demoAccounts: { role: UserRole; id?: string; email: string; displayName: string; educationLevel: StudentProfile['educationLevel']; program: StudentProfile['program'] }[] = [
   { role: 'student', email: 'ayse@kubik.com', displayName: 'Ayşe Yılmaz', educationLevel: 'lgs', program: 'lgs' },
   { role: 'parent', id: 'demo-parent-1', email: 'veli.ayse@kubik.com', displayName: 'Fatma Yılmaz', educationLevel: 'ortaokul', program: 'lgs' },
-  { role: 'teacher', email: 'demo-ogretmen@kubik.com', displayName: 'Demo Öğretmen', educationLevel: 'lise', program: 'yks' },
+  { role: 'teacher', id: 'demo-teacher-ali', email: 'ali.hoca@kubik.com', displayName: 'Ali Hoca', educationLevel: 'lise', program: 'yks' },
   { role: 'admin', email: 'demo-admin@kubik.com', displayName: 'Demo Yönetici', educationLevel: 'lise', program: 'yks' },
 ];
 
