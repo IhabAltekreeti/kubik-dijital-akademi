@@ -20,7 +20,12 @@ import TeacherStudentDetailPage from '@/pages/teacher/TeacherStudentDetailPage';
 import TeacherAssignmentsPage from '@/pages/teacher/TeacherAssignmentsPage';
 import TeacherMessagesPage from '@/pages/teacher/TeacherMessagesPage';
 import TeacherAIPage from '@/pages/teacher/TeacherAIPage';
-import AdminDashboardPage from '@/pages/AdminDashboardPage';
+import AdminHomePage from '@/pages/admin/AdminHomePage';
+import AdminAcademicsPage from '@/pages/admin/AdminAcademicsPage';
+import AdminTeachersPage from '@/pages/admin/AdminTeachersPage';
+import AdminEnrollmentPage from '@/pages/admin/AdminEnrollmentPage';
+import AdminFinancePage from '@/pages/admin/AdminFinancePage';
+import AdminAnnouncementsPage from '@/pages/admin/AdminAnnouncementsPage';
 
 function getDashboardPathForRole(role: UserRole): string {
   switch (role) {
@@ -84,7 +89,12 @@ export default function App() {
         <Route path="/teacher/profile" element={<RequireRole role="teacher"><ProfilePage /></RequireRole>} />
 
         {/* Admin routes */}
-        <Route path="/admin" element={<RequireRole role="admin"><AdminDashboardPage /></RequireRole>} />
+        <Route path="/admin" element={<RequireRole role="admin"><AdminHomePage /></RequireRole>} />
+        <Route path="/admin/academics" element={<RequireRole role="admin"><AdminAcademicsPage /></RequireRole>} />
+        <Route path="/admin/teachers" element={<RequireRole role="admin"><AdminTeachersPage /></RequireRole>} />
+        <Route path="/admin/enrollment" element={<RequireRole role="admin"><AdminEnrollmentPage /></RequireRole>} />
+        <Route path="/admin/finance" element={<RequireRole role="admin"><AdminFinancePage /></RequireRole>} />
+        <Route path="/admin/announcements" element={<RequireRole role="admin"><AdminAnnouncementsPage /></RequireRole>} />
         <Route path="/admin/profile" element={<RequireRole role="admin"><ProfilePage /></RequireRole>} />
 
         <Route path="*" element={<Navigate to="/" replace />} />
