@@ -19,7 +19,9 @@ import Badge from '@/components/ui/Badge';
 import { getCurrentUser } from '@/services/authService';
 import { getProgram, subjectLabels, subjectIcons, subjectTopics } from '@/data/programs';
 import { getIcon } from '@/components/ui/IconHelper';
-import { getQuestionsByTopic } from '@/data/questions';
+import { getQuestionsByTopic, getQuestionById } from '@/data/questions';
+import { getAssignments } from '@/services/studyPlanService';
+import { submitStudentAssignment } from '@/services/teacherService';
 import { getQuestionsForPractice } from '@/services/questionService';
 import {
   createPracticeSession,
@@ -48,6 +50,9 @@ export default function PracticePage() {
   const [searchParams] = useSearchParams();
   const preselectedSubject = searchParams.get('subject') as string | null;
   const preselectedTopic = searchParams.get('topic');
+  const assignmentParam = searchParams.get('assignment');
+  const [activeAssignmentId, setActiveAssignmentId] = useState<string | null>(null);
+  const [assignmentDone, setAssignmentDone] = useState(false);
 
   const [phase, setPhase] = useState<Phase>('select');
   const [selectedSubject, setSelectedSubject] = useState<string | null>(preselectedSubject);
@@ -78,6 +83,30 @@ export default function PracticePage() {
   }, [availableTopics]);
 
   if (!user) return null;
+
+  // Öğretmenin soru bankasından verdiği, henüz çözülmemiş ödev (URL'de ?assignment= varsa o, yoksa ilk bekleyen)
+  const openTeacherAssignments = getAssignments(user.id).filter((a) => a.questionIds?.length && a.status !== 'graded' && a.status !== 'submitted');
+  const pendingAssignment = openTeacherAssignments.find((a) => a.id === assignmentParam) ?? openTeacherAssignments[0];
+
+  function startAssignment() {
+    if (!pendingAssignment?.questionIds) return;
+    const qs = pendingAssignment.questionIds.map((id) => getQuestionById(id)).filter((q): q is Question => !!q);
+    if (qs.length === 0) return;
+    const session = createPracticeSession(user!.id, qs[0].subject, qs[0].topic, qs.map((q) => q.id));
+    setQuestions(qs);
+    setSelectedSubject(qs[0].subject);
+    setSelectedTopic(pendingAssignment.title);
+    setSessionId(session.id);
+    setActiveAssignmentId(pendingAssignment.id);
+    setAssignmentDone(false);
+    setCurrentIndex(0);
+    setSelectedOption(null);
+    setSubmitted(false);
+    setCorrectCount(0);
+    setIncorrectCount(0);
+    setSkippedCount(0);
+    setPhase('question');
+  }
 
   function startPractice(subject: string, topic: string) {
     const qs = getQuestionsForPractice(subject as Question['subject'], topic, 5);
@@ -129,6 +158,12 @@ export default function PracticePage() {
       if (sessionId) {
         completePracticeSession(sessionId, correctCount, incorrectCount, skippedCount);
       }
+      if (activeAssignmentId) {
+        // Öğretmen ödevi: sonuç öğretmen ve veli paneline yansır
+        submitStudentAssignment(activeAssignmentId, correctCount, questions.length);
+        setActiveAssignmentId(null);
+        setAssignmentDone(true);
+      }
       setPhase('complete');
     }
   }
@@ -146,6 +181,24 @@ export default function PracticePage() {
     return (
       <AppLayout pageTitle="Pratik" pageDescription="Bir konu seç ve pratiğe başla">
         <div className="space-y-6 animate-fade-in">
+          {pendingAssignment && (
+            <Card className="border-brand-200 bg-brand-50">
+              <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+                <div className="flex-1">
+                  <p className="text-xs font-semibold text-brand-700">{pendingAssignment.assignedByName} ödevi</p>
+                  <h2 className="text-base font-semibold text-navy-900">{pendingAssignment.title}</h2>
+                  <p className="text-sm text-navy-500">
+                    {pendingAssignment.questionIds?.length} soru · Son teslim{' '}
+                    {new Date(pendingAssignment.dueDate).toLocaleDateString('tr-TR', { day: 'numeric', month: 'long' })}
+                  </p>
+                </div>
+                <Button variant="primary" onClick={startAssignment}>
+                  Ödeve başla
+                  <ArrowRight className="h-4 w-4" />
+                </Button>
+              </div>
+            </Card>
+          )}
           {Object.keys(groupedBySubject).length === 0 ? (
             <Card>
               <div className="text-center py-8">
@@ -410,7 +463,8 @@ export default function PracticePage() {
               <div className="inline-flex h-20 w-20 items-center justify-center rounded-full bg-brand-50 mb-4">
                 <Trophy className="h-10 w-10 text-brand-600" />
               </div>
-              <h2 className="text-2xl font-bold text-navy-900 mb-2">Pratik tamamlandı!</h2>
+              <h2 className="text-2xl font-bold text-navy-900 mb-2">{assignmentDone ? 'Ödev teslim edildi!' : 'Pratik tamamlandı!'}</h2>
+              {assignmentDone && <p className="text-sm text-brand-700 mb-2">Sonucun öğretmenine ve velinin paneline iletildi.</p>}
               <p className="text-sm text-navy-500 mb-6">
                 {selectedSubject && selectedTopic && `${subjectLabels[selectedSubject as keyof typeof subjectLabels]} · ${selectedTopic}`}
               </p>
