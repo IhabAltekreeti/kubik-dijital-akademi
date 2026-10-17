@@ -10,16 +10,25 @@ import {
   Users,
   Presentation,
   Shield,
+  BookOpen,
+  ClipboardList,
+  MessageSquare,
+  Sparkles,
+  Repeat,
   type LucideIcon,
 } from 'lucide-react';
 import type { UserRole } from '@/types';
-import { getCurrentUser, logout } from '@/services/authService';
+import { getCurrentUser, logout, loginAsDemo } from '@/services/authService';
 
 interface RoleLayoutProps {
   children: ReactNode;
   pageTitle: string;
   pageDescription?: string;
   role: UserRole;
+  /** Başlık çubuğunun sağında gösterilecek butonlar */
+  actions?: ReactNode;
+  /** Menüde rozet (ör. okunmamış mesaj sayısı): href → sayı */
+  navBadges?: Record<string, number>;
 }
 
 interface NavItem {
@@ -35,7 +44,12 @@ const navByRole: Record<UserRole, NavItem[]> = {
     { label: 'Profil', href: '/parent/profile', icon: User },
   ],
   teacher: [
-    { label: 'Panel', href: '/teacher', icon: LayoutDashboard },
+    { label: 'Ana Sayfa', href: '/teacher', icon: LayoutDashboard },
+    { label: 'Şubelerim', href: '/teacher/classes', icon: BookOpen },
+    { label: 'Öğrenciler', href: '/teacher/students', icon: Users },
+    { label: 'Ödevler', href: '/teacher/assignments', icon: ClipboardList },
+    { label: 'Veli Mesajları', href: '/teacher/messages', icon: MessageSquare },
+    { label: 'Kübik AI', href: '/teacher/ai', icon: Sparkles },
     { label: 'Profil', href: '/teacher/profile', icon: User },
   ],
   admin: [
@@ -51,7 +65,7 @@ const roleBadgeConfig: Record<UserRole, { label: string; icon: LucideIcon; color
   admin: { label: 'Yönetici', icon: Shield, color: 'bg-error-100 text-error-700' },
 };
 
-function SidebarNavLink({ item, onClick }: { item: NavItem; onClick?: () => void }) {
+function SidebarNavLink({ item, onClick, badge }: { item: NavItem; onClick?: () => void; badge?: number }) {
   const Icon = item.icon;
   const isEnd = item.href === '/parent' || item.href === '/teacher' || item.href === '/admin';
   return (
@@ -69,12 +83,17 @@ function SidebarNavLink({ item, onClick }: { item: NavItem; onClick?: () => void
       }
     >
       <Icon className="h-5 w-5 shrink-0" />
-      {item.label}
+      <span className="flex-1">{item.label}</span>
+      {badge ? (
+        <span className="min-w-[20px] h-5 px-1.5 inline-flex items-center justify-center rounded-full bg-error-500 text-[11px] font-bold text-white">
+          {badge}
+        </span>
+      ) : null}
     </NavLink>
   );
 }
 
-export default function RoleLayout({ children, pageTitle, pageDescription, role }: RoleLayoutProps) {
+export default function RoleLayout({ children, pageTitle, pageDescription, role, actions, navBadges }: RoleLayoutProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const navigate = useNavigate();
   const user = getCurrentUser();
@@ -98,6 +117,24 @@ export default function RoleLayout({ children, pageTitle, pageDescription, role 
   }
 
   const navItems = navByRole[role];
+
+  // Sunum kolaylığı: demo velisi tek tıkla Ali Hoca'nın ekranına geçebilir
+  function switchToTeacherDemo() {
+    const r = loginAsDemo('teacher');
+    if (r.success) navigate('/teacher');
+  }
+  const headerActions =
+    actions ??
+    (role === 'parent' && user.isDemo ? (
+      <button
+        onClick={switchToTeacherDemo}
+        className="inline-flex items-center gap-1.5 h-9 px-3 rounded-lg border border-dashed border-navy-300 text-xs font-medium text-navy-600 hover:bg-navy-50"
+        title="Sadece demo içindir"
+      >
+        <Repeat className="h-3.5 w-3.5" />
+        Öğretmen ekranı (demo)
+      </button>
+    ) : null);
   const badge = roleBadgeConfig[role];
   const BadgeIcon = badge.icon;
 
@@ -114,7 +151,7 @@ export default function RoleLayout({ children, pageTitle, pageDescription, role 
 
         <nav className="flex-1 space-y-1 px-3 py-4 overflow-y-auto" aria-label="Ana navigasyon">
           {navItems.map((item) => (
-            <SidebarNavLink key={item.href} item={item} />
+            <SidebarNavLink key={item.href} item={item} badge={navBadges?.[item.href]} />
           ))}
         </nav>
 
@@ -164,7 +201,7 @@ export default function RoleLayout({ children, pageTitle, pageDescription, role 
             </div>
             <nav className="flex-1 space-y-1 px-3 py-4 overflow-y-auto" aria-label="Mobil navigasyon">
               {navItems.map((item) => (
-                <SidebarNavLink key={item.href} item={item} onClick={() => setSidebarOpen(false)} />
+                <SidebarNavLink key={item.href} item={item} badge={navBadges?.[item.href]} onClick={() => setSidebarOpen(false)} />
               ))}
             </nav>
             <div className="border-t border-navy-100 p-3">
@@ -222,6 +259,7 @@ export default function RoleLayout({ children, pageTitle, pageDescription, role 
                 <h1 className="text-lg font-semibold text-navy-900">{pageTitle}</h1>
                 {pageDescription && <p className="text-sm text-navy-400">{pageDescription}</p>}
               </div>
+              {headerActions && <div className="flex items-center gap-2">{headerActions}</div>}
             </div>
           </div>
         </header>
@@ -230,6 +268,7 @@ export default function RoleLayout({ children, pageTitle, pageDescription, role 
           <div className="lg:hidden mb-5">
             <h1 className="text-xl font-bold text-navy-900">{pageTitle}</h1>
             {pageDescription && <p className="text-sm text-navy-400 mt-0.5">{pageDescription}</p>}
+            {headerActions && <div className="mt-3 flex flex-wrap items-center gap-2">{headerActions}</div>}
           </div>
           {children}
         </main>

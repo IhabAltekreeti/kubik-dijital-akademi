@@ -13,7 +13,13 @@ import ProfilePage from '@/pages/ProfilePage';
 import StudyPlanPage from '@/pages/StudyPlanPage';
 import AIAssistantPage from '@/pages/AIAssistantPage';
 import ParentDashboardPage from '@/pages/ParentDashboardPage';
-import TeacherDashboardPage from '@/pages/TeacherDashboardPage';
+import TeacherHomePage from '@/pages/teacher/TeacherHomePage';
+import TeacherClassesPage from '@/pages/teacher/TeacherClassesPage';
+import TeacherStudentsPage from '@/pages/teacher/TeacherStudentsPage';
+import TeacherStudentDetailPage from '@/pages/teacher/TeacherStudentDetailPage';
+import TeacherAssignmentsPage from '@/pages/teacher/TeacherAssignmentsPage';
+import TeacherMessagesPage from '@/pages/teacher/TeacherMessagesPage';
+import TeacherAIPage from '@/pages/teacher/TeacherAIPage';
 import AdminDashboardPage from '@/pages/AdminDashboardPage';
 
 function getDashboardPathForRole(role: UserRole): string {
@@ -68,7 +74,13 @@ export default function App() {
         <Route path="/parent/profile" element={<RequireRole role="parent"><ProfilePage /></RequireRole>} />
 
         {/* Teacher routes */}
-        <Route path="/teacher" element={<RequireRole role="teacher"><TeacherDashboardPage /></RequireRole>} />
+        <Route path="/teacher" element={<RequireRole role="teacher"><TeacherHomePage /></RequireRole>} />
+        <Route path="/teacher/classes" element={<RequireRole role="teacher"><TeacherClassesPage /></RequireRole>} />
+        <Route path="/teacher/students" element={<RequireRole role="teacher"><TeacherStudentsPage /></RequireRole>} />
+        <Route path="/teacher/students/:id" element={<RequireRole role="teacher"><TeacherStudentDetailPage /></RequireRole>} />
+        <Route path="/teacher/assignments" element={<RequireRole role="teacher"><TeacherAssignmentsPage /></RequireRole>} />
+        <Route path="/teacher/messages" element={<RequireRole role="teacher"><TeacherMessagesPage /></RequireRole>} />
+        <Route path="/teacher/ai" element={<RequireRole role="teacher"><TeacherAIPage /></RequireRole>} />
         <Route path="/teacher/profile" element={<RequireRole role="teacher"><ProfilePage /></RequireRole>} />
 
         {/* Admin routes */}
